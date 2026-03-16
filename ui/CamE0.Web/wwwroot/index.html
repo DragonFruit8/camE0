@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CamE0 - NVR Security Dashboard</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #475569;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Login Page */
+        #login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+        }
+
+        .login-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .login-container h1 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-container p {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.375rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8rem; }
+
+        .error-msg {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        /* Dashboard Layout */
+        #dashboard-page { display: none; }
+
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.5rem;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-user {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.5rem;
+            gap: 0;
+        }
+
+        .tab {
+            padding: 0.75rem 1.25rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .tab:hover { color: var(--text-primary); }
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .dashboard-content {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .stat-card .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0.25rem 0;
+        }
+
+        .stat-card .stat-desc {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Camera Grid */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.125rem;
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1rem;
+        }
+
+        .camera-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .camera-preview {
+            height: 225px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            position: relative;
+        }
+
+        .camera-preview .status-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-online { background: var(--success); color: white; }
+        .status-offline { background: var(--border); color: var(--text-secondary); }
+        .status-recording { background: var(--danger); color: white; }
+
+        .camera-info {
+            padding: 1rem;
+        }
+
+        .camera-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .camera-info .camera-details {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .camera-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Recordings Table */
+        .table-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td { border-top: 1px solid var(--border); }
+
+        tr:hover td { background: rgba(59, 130, 246, 0.05); }
+
+        /* Motion Events */
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .event-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-item .event-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .event-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--warning);
+        }
+
+        .event-time {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .modal .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        /* System Health */
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .health-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .health-card h3 {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .health-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        .health-item .label { color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page">
+        <div class="login-container">
+            <h1>CamE0</h1>
+            <p>NVR Security Monitoring System</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            <div id="login-error" class="error-msg">Invalid credentials</div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard-page">
+        <nav class="navbar">
+            <div class="navbar-brand">CamE0 NVR</div>
+            <div class="navbar-actions">
+                <span class="navbar-user" id="nav-username"></span>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="overview" onclick="switchTab('overview')">Overview</div>
+            <div class="tab" data-tab="cameras" onclick="switchTab('cameras')">Cameras</div>
+            <div class="tab" data-tab="recordings" onclick="switchTab('recordings')">Recordings</div>
+            <div class="tab" data-tab="motion" onclick="switchTab('motion')">Motion Events</div>
+            <div class="tab" data-tab="system" onclick="switchTab('system')">System</div>
+        </div>
+
+        <div class="dashboard-content">
+            <!-- Overview Tab -->
+            <div class="tab-panel active" id="panel-overview">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Cameras</div>
+                        <div class="stat-value" id="stat-cameras">0</div>
+                        <div class="stat-desc">Active devices</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Recording</div>
+                        <div class="stat-value" id="stat-recording">0</div>
+                        <div class="stat-desc">Active recordings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Motion Events</div>
+                        <div class="stat-value" id="stat-motion">0</div>
+                        <div class="stat-desc">Last 24 hours</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Storage Used</div>
+                        <div class="stat-value" id="stat-storage">0 GB</div>
+                        <div class="stat-desc">of available space</div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2>Camera Feeds</h2>
+                </div>
+                <div class="camera-grid" id="overview-cameras"></div>
+            </div>
+
+            <!-- Cameras Tab -->
+            <div class="tab-panel" id="panel-cameras">
+                <div class="section-header">
+                    <h2>Camera Management</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddCameraModal()">+ Add Camera</button>
+                </div>
+                <div class="camera-grid" id="cameras-list"></div>
+            </div>
+
+            <!-- Recordings Tab -->
+            <div class="tab-panel" id="panel-recordings">
+                <div class="section-header">
+                    <h2>Recordings</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Camera</th>
+                                <th>Start Time</th>
+                                <th>Duration</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordings-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Motion Events Tab -->
+            <div class="tab-panel" id="panel-motion">
+                <div class="section-header">
+                    <h2>Motion Events</h2>
+                </div>
+                <div class="event-list" id="motion-events"></div>
+            </div>
+
+            <!-- System Tab -->
+            <div class="tab-panel" id="panel-system">
+                <div class="health-grid">
+                    <div class="health-card">
+                        <h3>System Health</h3>
+                        <div id="system-health">
+                            <div class="health-item">
+                                <span class="label">Status</span>
+                                <span id="health-status">--</span>
+                            </div>
+                            <div class="health-item">
+                                <span class="label">Version</span>
+                                <span id="health-version">--</span>
+                            </div>
+                            <div class="health-item">
+                                <span class="label">FFmpeg</span>
+                                <span id="health-ffmpeg">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="health-card">
+                        <h3>Storage</h3>
+                        <div id="storage-info">
+                            <div class="health-item">
+                                <span class="label">Total Space</span>
+                                <span id="storage-total">--</span>
+                            </div>
+                            <div class="health-item">
+                                <span class="label">Used Space</span>
+                                <span id="storage-used">--</span>
+                            </div>
+                            <div class="health-item">
+                                <span class="label">Available</span>
+                                <span id="storage-available">--</span>
+                            </div>
+                            <div class="health-item">
+                                <span class="label">Files</span>
+                                <span id="storage-files">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="health-card">
+                        <h3>Audit Log</h3>
+                        <div class="event-list" id="audit-log"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Camera Modal -->
+    <div class="modal-overlay" id="add-camera-modal">
+        <div class="modal">
+            <h2>Add Camera</h2>
+            <form id="add-camera-form">
+                <div class="form-group">
+                    <label>Camera Name</label>
+                    <input type="text" id="cam-name" placeholder="e.g. Front Door" required>
+                </div>
+                <div class="form-group">
+                    <label>IP Address</label>
+                    <input type="text" id="cam-ip" placeholder="e.g. 192.168.1.100" required>
+                </div>
+                <div class="form-group">
+                    <label>Port</label>
+                    <input type="number" id="cam-port" value="554">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="cam-user" placeholder="Camera username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="cam-pass" placeholder="Camera password">
+                </div>
+                <div class="form-group">
+                    <label>RTSP URL (optional override)</label>
+                    <input type="text" id="cam-rtsp" placeholder="rtsp://...">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Camera</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        let authToken = localStorage.getItem('cameo_token');
+        let currentUser = null;
+
+        // API Helper
+        async function api(endpoint, options = {}) {
+            const headers = { 'Content-Type': 'application/json', ...options.headers };
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+            const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+            if (response.status === 401) { logout(); return null; }
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error || `Request failed: ${response.status}`);
+            }
+            if (response.status === 204) return null;
+            return response.json();
+        }
+
+        // Auth
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+
+            try {
+                const data = await api('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (data && data.token) {
+                    authToken = data.token;
+                    currentUser = data;
+                    localStorage.setItem('cameo_token', authToken);
+                    showDashboard();
+                } else {
+                    errorEl.textContent = 'Invalid credentials';
+                    errorEl.style.display = 'block';
+                }
+            } catch (err) {
+                errorEl.textContent = err.message || 'Login failed';
+                errorEl.style.display = 'block';
+            }
+        });
+
+        function logout() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('cameo_token');
+            document.getElementById('login-page').style.display = 'flex';
+            document.getElementById('dashboard-page').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('dashboard-page').style.display = 'block';
+            document.getElementById('nav-username').textContent = currentUser?.username || 'User';
+            loadDashboardData();
+        }
+
+        // Tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            document.getElementById(`panel-${tab}`).classList.add('active');
+        }
+
+        // Load Data
+        async function loadDashboardData() {
+            try {
+                await Promise.all([loadCameras(), loadRecordings(), loadSystemHealth(), loadStorageStats()]);
+            } catch (e) { console.error('Error loading dashboard:', e); }
+        }
+
+        async function loadCameras() {
+            try {
+                const cameras = await api('/cameras') || [];
+                document.getElementById('stat-cameras').textContent = cameras.length;
+
+                const renderCamera = (cam) => `
+                    <div class="camera-card">
+                        <div class="camera-preview">
+                            <span class="status-badge status-${cam.status?.toLowerCase() || 'offline'}">${cam.status || 'Offline'}</span>
+                            <span>Camera Feed: ${cam.name}</span>
+                        </div>
+                        <div class="camera-info">
+                            <h3>${cam.name}</h3>
+                            <div class="camera-details">${cam.ipAddress}:${cam.port} | ${cam.manufacturer || 'Unknown'}</div>
+                            <div class="camera-actions">
+                                <button class="btn btn-success btn-sm" onclick="startStream('${cam.id}')">Stream</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCamera('${cam.id}')">Remove</button>
+                            </div>
+                        </div>
+                    </div>`;
+
+                document.getElementById('overview-cameras').innerHTML = cameras.map(renderCamera).join('') || '<p style="color:var(--text-secondary)">No cameras configured. Add a camera to get started.</p>';
+                document.getElementById('cameras-list').innerHTML = cameras.map(renderCamera).join('') || '<p style="color:var(--text-secondary)">No cameras configured.</p>';
+            } catch (e) { console.error('Error loading cameras:', e); }
+        }
+
+        async function loadRecordings() {
+            try {
+                const recordings = await api('/recordings') || [];
+                const active = recordings.filter(r => r.status === 'Recording');
+                document.getElementById('stat-recording').textContent = active.length;
+
+                document.getElementById('recordings-table').innerHTML = recordings.map(r => `
+                    <tr>
+                        <td>${r.cameraName || r.cameraId}</td>
+                        <td>${new Date(r.startTime).toLocaleString()}</td>
+                        <td>${r.endTime ? formatDuration(new Date(r.endTime) - new Date(r.startTime)) : 'In Progress'}</td>
+                        <td>${r.type}</td>
+                        <td>${formatBytes(r.fileSizeBytes)}</td>
+                        <td><span class="status-badge status-${r.status?.toLowerCase()}">${r.status}</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-secondary)">No recordings</td></tr>';
+            } catch (e) { console.error('Error loading recordings:', e); }
+        }
+
+        async function loadSystemHealth() {
+            try {
+                const health = await api('/system/health');
+                if (health) {
+                    document.getElementById('health-status').textContent = health.status || '--';
+                    document.getElementById('health-version').textContent = health.version || '--';
+                    document.getElementById('health-ffmpeg').textContent = health.ffmpegAvailable ? 'Available' : 'Not Found';
+                }
+            } catch (e) { console.error('Error loading health:', e); }
+        }
+
+        async function loadStorageStats() {
+            try {
+                const stats = await api('/storage/stats');
+                if (stats) {
+                    document.getElementById('stat-storage').textContent = `${stats.usedSpaceGb?.toFixed(1) || 0} GB`;
+                    document.getElementById('storage-total').textContent = `${stats.totalSpaceGb?.toFixed(1) || 0} GB`;
+                    document.getElementById('storage-used').textContent = `${stats.usedSpaceGb?.toFixed(1) || 0} GB`;
+                    document.getElementById('storage-available').textContent = `${stats.availableSpaceGb?.toFixed(1) || 0} GB`;
+                    document.getElementById('storage-files').textContent = stats.totalFiles || 0;
+                }
+            } catch (e) { console.error('Error loading storage:', e); }
+        }
+
+        // Actions
+        async function startStream(cameraId) {
+            try { await api(`/streams/${cameraId}/start`, { method: 'POST' }); loadCameras(); }
+            catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function deleteCamera(cameraId) {
+            if (!confirm('Are you sure you want to remove this camera?')) return;
+            try { await api(`/cameras/${cameraId}`, { method: 'DELETE' }); loadCameras(); }
+            catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // Modal
+        function openAddCameraModal() { document.getElementById('add-camera-modal').classList.add('active'); }
+        function closeModal() { document.getElementById('add-camera-modal').classList.remove('active'); }
+
+        document.getElementById('add-camera-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const camera = {
+                name: document.getElementById('cam-name').value,
+                ipAddress: document.getElementById('cam-ip').value,
+                port: parseInt(document.getElementById('cam-port').value) || 554,
+                username: document.getElementById('cam-user').value,
+                password: document.getElementById('cam-pass').value,
+                rtspUrl: document.getElementById('cam-rtsp').value
+            };
+
+            try {
+                await api('/cameras', { method: 'POST', body: JSON.stringify(camera) });
+                closeModal();
+                e.target.reset();
+                loadCameras();
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+
+        // Helpers
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function formatDuration(ms) {
+            if (!ms) return '--';
+            const s = Math.floor(ms / 1000);
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            return h > 0 ? `${h}h ${m}m` : `${m}m ${s % 60}s`;
+        }
+
+        // Init
+        if (authToken) {
+            api('/auth/validate', { method: 'POST' }).then(data => {
+                if (data) { currentUser = { username: data.username }; showDashboard(); }
+                else logout();
+            }).catch(() => logout());
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>CamE0.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.12" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\CamE0.Security\CamE0.Security.csproj" />
+    <ProjectReference Include="..\..\core\CamE0.Authentication\CamE0.Authentication.csproj" />
+    <ProjectReference Include="..\..\core\CamE0.Devices\CamE0.Devices.csproj" />
+    <ProjectReference Include="..\..\core\CamE0.Video\CamE0.Video.csproj" />
+    <ProjectReference Include="..\..\core\CamE0.Storage\CamE0.Storage.csproj" />
+    <ProjectReference Include="..\..\core\CamE0.Api\CamE0.Api.csproj" />
+    <ProjectReference Include="..\..\plugins\CamE0.PluginSdk\CamE0.PluginSdk.csproj" />
+    <ProjectReference Include="..\..\integrations\CamE0.Gateway\CamE0.Gateway.csproj" />
+  </ItemGroup>
+</Project>
