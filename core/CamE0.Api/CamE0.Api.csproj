@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CamE0.Api</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CamE0.Security\CamE0.Security.csproj" />
+    <ProjectReference Include="..\CamE0.Authentication\CamE0.Authentication.csproj" />
+    <ProjectReference Include="..\CamE0.Devices\CamE0.Devices.csproj" />
+    <ProjectReference Include="..\CamE0.Video\CamE0.Video.csproj" />
+    <ProjectReference Include="..\CamE0.Storage\CamE0.Storage.csproj" />
+  </ItemGroup>
+</Project>
